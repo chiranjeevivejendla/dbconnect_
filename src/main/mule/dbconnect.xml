@@ -8,9 +8,10 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="4d0fcade-0280-4a16-95b6-3270b604a82d" >
-		<db:generic-connection url="jdbc:snowflake://blfyais-bda21111.snowflakecomputing.com/?user=vejchiru11&amp;password=CHIRUchinnu@11&amp;database=Employees&amp;schema=Info" driverClassName="com.snowflake.client.jdbc.SnowflakeDriver" />
+		<db:generic-connection url="jdbc:snowflake://blfyais-bda21111.snowflakecomputing.com/?user=${db.username}&amp;password=${db.password}&amp;database=${db.database}&amp;schema=${db.schema}" driverClassName="com.snowflake.client.jdbc.SnowflakeDriver" user="${db.username}" password="${db.password}"/>
 	</db:config>
 	<api-gateway:autodiscovery apiId="17337804" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6ac54954-6f6e-4423-90d3-11ec705f62e3" flowRef="dbconnect-main" />
+	<configuration-properties doc:name="Configuration properties" doc:id="a29cd187-6cdb-4bcc-86f5-48e8a9859c26" file="db.properties" />
 	<flow name="dbconnect-main">
         <http:listener config-ref="HTTP_Listener_config" path="/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -140,10 +141,14 @@ payload]]></ee:set-payload>
             </ee:message>
         </ee:transform>
 		<db:update doc:name="Update" doc:id="7fa3964e-b094-4da4-aa8a-577e410b13fc" config-ref="Database_Config">
-			<db:sql ><![CDATA[Update Info where PersonId: PersonId]]></db:sql>
+			<db:sql ><![CDATA[Update Info set column2= :FirstName, column3= :LastName, column4= :PhoneNumber, column5= :EmailId where PersonId= :PersonId]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	
-	PersonId: payload.PersonId
+	PersonId: payload.PersonId,
+	FirstName: payload.FirstName,
+	LastName: payload.LastName,
+	PhoneNumber: payload.PhoneNumber,
+	EmailId: payload.EmailId
 }]]]></db:input-parameters>
 		</db:update>
     </flow>
